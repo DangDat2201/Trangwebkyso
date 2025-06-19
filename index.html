@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng Dụng Truyền File Ký Số & Mã Hóa An Toàn</title>
+    <!-- CSS thuần túy: Tùy chỉnh để tạo giao diện chuyên nghiệp -->
+    <style>
+        /* --- Các biến CSS toàn cục để quản lý màu sắc dễ dàng hơn --- */
+        :root {
+            --primary-color: #4F46E5; /* Indigo-600 */
+            --primary-dark-color: #4338CA; /* Indigo-700 */
+            --secondary-color: #6D28D9; /* Purple-700 */
+            --accent-color: #A78BFA; /* Violet-400, for highlights */
+            --background-gradient-start: #ECE9F3; /* Light purple-gray */
+            --background-gradient-end: #D4D8EF; /* Slightly darker blue-purple */
+            --card-background: #FFFFFF;
+            --text-color-dark: #1F2937; /* Gray-900 */
+            --text-color-medium: #374151; /* Gray-700 */
+            --text-color-light: #6B7280; /* Gray-500 */
+            --border-color-light: #E5E7EB; /* Gray-200 */
+            --border-color-medium: #D1D5DB; /* Gray-300 */
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(0, 0, 0, 0.15);
+            --shadow-strong: rgba(0, 0, 0, 0.25);
+            --warning-bg: #FFFBEB; /* Yellow-50 */
+            --warning-border: #FBBF24; /* Yellow-400 */
+            --warning-text: #B45309; /* Yellow-800 */
+            --success-bg: #D1FAE5; /* Green-100 */
+            --success-text: #065F46; /* Green-800 */
+            --error-bg: #FEE2E2; /* Red-100 */
+            --error-text: #991B1B; /* Red-800 */
+        }
+
+        /* --- Cài đặt cơ bản cho body và html --- */
+        html {
+            box-sizing: border-box; /* Dễ dàng quản lý padding và border */
+            font-size: 16px; /* Kích thước font cơ sở */
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif; /* Giả định font Inter có sẵn */
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%); /* Nền gradient mượt mà */
+            color: var(--text-color-medium);
+            line-height: 1.6;
+            min-height: 100vh; /* Chiều cao tối thiểu 100% viewport */
+            display: flex; /* Dùng flexbox để căn giữa nội dung */
+            flex-direction: column; /* Cho phép tiêu đề ở trên cùng */
+            align-items: center; /* Căn giữa theo chiều ngang */
+            padding: 1.5rem; /* Padding tổng thể quanh nội dung chính */
+            margin: 0; /* Loại bỏ margin mặc định của body */
+            scroll-behavior: smooth; /* Cuộn mượt mà */
+        }
+
+        /* --- Styling cho container chính của ứng dụng --- */
+        .main-container {
+            background-color: var(--card-background);
+            padding: 2.5rem 2.5rem; /* Padding lớn hơn cho container chính */
+            border-radius: 1.5rem; /* Bo góc lớn hơn */
+            box-shadow: 0 20px 50px var(--shadow-medium); /* Đổ bóng mạnh hơn cho container chính */
+            max-width: 85rem; /* Giới hạn chiều rộng tối đa */
+            width: 100%; /* Đảm bảo chiếm toàn bộ chiều rộng có sẵn */
+            border: 1px solid var(--border-color-light); /* Viền nhẹ */
+            margin-top: 2rem; /* Khoảng cách từ header */
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem; /* Khoảng cách giữa các section */
+        }
+
+        /* --- Styling cho Header chính --- */
+        .app-header {
+            width: 100%;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .app-header .main-title {
+            font-size: 3.5rem; /* Kích thước font rất lớn */
+            font-weight: 800; /* Extra Bold */
+            color: var(--primary-dark-color);
+            line-height: 1.2;
+            letter-spacing: -0.04em; /* Giảm khoảng cách chữ cái */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.05); /* Đổ bóng chữ nhẹ */
+        }
+
+        .app-header .tagline {
+            font-size: 1.25rem;
+            color: var(--text-color-light);
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* --- Styling cho các phần chức năng (Sections) --- */
+        .function-section {
+            background-color: var(--card-background);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 10px 20px var(--shadow-light); /* Đổ bóng mềm mại hơn cho section */
+            border: 1px solid var(--border-color-light);
+        }
+
+        .function-section-title {
+            font-size: 2rem;
+            font-weight: 700; /* Bold */
+            color: var(--text-color-dark);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 0.75rem;
+        }
+        .function-section-title::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: 5rem;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        /* --- Styling cho thẻ chức năng (feature card) --- */
+        .feature-card {
+            background-color: var(--card-background);
+            padding: 2rem; /* Padding bên trong thẻ */
+            border-radius: 1rem; /* Bo góc trung bình */
+            box-shadow: 0 6px 16px var(--shadow-light); /* Đổ bóng mềm mại hơn */
+            border: 1px solid var(--border-color-medium); /* Viền thẻ */
+            display: flex; /* Dùng flexbox để căn chỉnh nội dung */
+            flex-direction: column; /* Sắp xếp theo chiều dọc */
+            justify-content: space-between; /* Đẩy các phần tử ra hai đầu */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng chuyển động mượt mà */
+            height: 100%; /* Đảm bảo các thẻ có cùng chiều cao trong lưới */
+        }
+
+        .feature-card:hover {
+            transform: translateY(-0.375rem); /* Nổi lên một chút khi hover */
+            box-shadow: 0 10px 25px var(--shadow-medium); /* Đổ bóng mạnh hơn khi hover */
+        }
+
+        h3 {
+            font-size: 1.5rem; /* Kích thước font cho tiêu đề thẻ */
+            font-weight: 600; /* Semi Bold */
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            font-size: 0.9375rem; /* Kích thước font cho đoạn văn mô tả */
+            color: var(--text-color-light);
+            margin-bottom: 1.25rem;
+        }
+
+        /* --- Styling cho nút chính (Primary Button) --- */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.75rem; /* Padding lớn hơn */
+            border: 1px solid transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* Đổ bóng mạnh hơn */
+            color: #FFFFFF;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            width: 100%;
+            margin-top: auto; /* Đẩy nút xuống dưới cùng của card */
+            text-decoration: none;
+            overflow: hidden; /* Che đi phần tử spinner thừa khi không dùng */
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--primary-dark-color) 0%, #5A20B7 100%);
+            transform: translateY(-0.1875rem) scale(1.01);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.4);
+        }
+
+        /* --- Styling cho nút phụ (Secondary Button) --- */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem; /* Padding */
+            border: 1px solid var(--border-color-medium);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            border-radius: 0.625rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            color: var(--text-color-medium);
+            background-color: var(--card-background);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #F7F8F9;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        /* --- Styling cho input và textarea --- */
+        .form-group {
+            margin-bottom: 1rem; /* Khoảng cách giữa các nhóm form */
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem; /* Font size nhỏ cho label */
+            font-weight: 500; /* Medium */
+            color: var(--text-color-medium);
+            margin-bottom: 0.375rem;
+        }
+
+        .input-field, .textarea-field {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem; /* Padding */
+            border: 1px solid var(--border-color-medium);
+            border-radius: 0.625rem; /* Bo góc */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Đổ bóng trong nhẹ */
+            font-size: 0.9375rem;
+            color: var(--text-color-dark);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-field:focus, .textarea-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3); /* Đổ bóng focus nổi bật hơn */
+        }
+
+        .textarea-field {
+            resize: vertical; /* Cho phép thay đổi kích thước theo chiều dọc */
+            min-height: 7rem; /* Chiều cao tối thiểu cho textarea */
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* Font monospace cho code/key */
+            font-size: 0.75rem; /* Font size nhỏ cho nội dung key */
+        }
+        /* Đối với input type="file" có thể cần padding đặc biệt */
+        input[type="file"].input-field {
+            padding: 0.625rem 0.75rem; /* Slightly less padding for file input */
+        }
+
+
+        /* --- Styling cho các vùng kết quả/output --- */
+        .output-area {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: #F8F8F8; /* Nền nhẹ nhàng hơn */
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color-light);
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.04); /* Đổ bóng trong nhẹ */
+        }
+        .output-area h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            margin-bottom: 1rem;
+        }
+        .output-area p {
+            font-size: 0.875rem;
+            color: var(--text-color-medium);
+            margin-bottom: 0.75rem;
+        }
+        .output-area .output-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-color-medium);
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+        }
+
+
+        /* --- Styling cho hộp thông báo tùy chỉnh (Custom Modal) --- */
+        .modal {
+            display: none; /* Mặc định ẩn */
+            position: fixed; /* Giữ vị trí ngay cả khi cuộn */
+            z-index: 1000; /* Đặt ở trên cùng */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Cho phép cuộn nếu nội dung quá dài */
+            background-color: rgba(0,0,0,0.6); /* Nền mờ hơn */
+            align-items: center;
+            justify-content: center;
+            opacity: 0; /* Ẩn ban đầu để tạo hiệu ứng fade-in */
+            transition: opacity 0.3s ease-in-out; /* Hiệu ứng chuyển động mờ dần */
+        }
+
+        .modal.show {
+            opacity: 1; /* Hiển thị và fade-in */
+            display: flex; /* Kích hoạt display flex khi show */
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 2.5rem; /* Tăng padding */
+            border-radius: 1.25rem; /* Góc bo tròn lớn hơn */
+            width: 90%;
+            max-width: 40rem; /* Max width lớn hơn */
+            box-shadow: 0 1.5rem 3.5rem var(--shadow-strong); /* Đổ bóng mạnh mẽ hơn */
+            position: relative;
+            transform: translateY(-2rem); /* Hiệu ứng trượt vào */
+            transition: transform 0.3s ease-in-out;
+            border: 1px solid var(--border-color-light); /* Viền nhẹ */
+            text-align: center; /* Căn giữa nội dung trong modal */
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0); /* Trượt về vị trí ban đầu khi show */
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            color: #AAAAAA; /* Màu xám */
+            font-size: 2.2rem; /* Kích thước lớn hơn */
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--text-color-dark);
+        }
+
+        /* --- Hiệu ứng tải (loading spinner) --- */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3); /* Màu trắng trong suốt */
+            border-top: 4px solid #fff; /* Màu trắng */
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 0.75rem; /* Khoảng cách với chữ */
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Styling cho thông báo cảnh báo (Security Warning) --- */
+        .alert-warning {
+            background-color: var(--warning-bg);
+            border-left: 0.25rem solid var(--warning-border);
+            color: var(--warning-text);
+            padding: 1.25rem;
+            border-radius: 0.625rem;
+            margin-bottom: 2.5rem;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Đổ bóng nhẹ */
+        }
+        .alert-warning .alert-title {
+            font-weight: 700; /* Bold */
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+        }
+        .alert-warning .alert-text {
+            font-size: 0.875rem; /* Small font size */
+        }
+
+        /* --- Styling cho thông báo trạng thái (Verification / Decryption Status) --- */
+        .status-message {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.625rem;
+            font-weight: 700; /* Bold */
+            text-align: center;
+            font-size: 1.125rem; /* Kích thước font lớn hơn */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-valid {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+        }
+        .status-invalid {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+        }
+
+        /* --- Responsive design using Media Queries --- */
+
+        /* Cho màn hình nhỏ hơn (điện thoại) */
+        @media (max-width: 767px) {
+            body {
+                padding: 1rem;
+            }
+            .app-header .main-title {
+                font-size: 2.5rem;
+            }
+            .app-header .tagline {
+                font-size: 1rem;
+            }
+            .main-container {
+                padding: 1.5rem;
+                border-radius: 1rem;
+                margin-top: 1rem;
+                gap: 1.5rem;
+            }
+            .function-section {
+                padding: 1.5rem;
+                border-radius: 1rem;
+            }
+            .function-section-title {
+                font-size: 1.75rem;
+                margin-bottom: 1rem;
+            }
+            .function-section-title::after {
+                width: 3rem;
+                height: 3px;
+            }
+            .feature-card {
+                padding: 1.25rem;
+                border-radius: 0.75rem;
+            }
+            h3 {
+                font-size: 1.375rem;
+                margin-bottom: 0.75rem;
+            }
+            .card-description {
+                font-size: 0.875rem;
+                margin-bottom: 1rem;
+            }
+            .btn-primary, .btn-secondary {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9375rem;
+            }
+            .input-field, .textarea-field {
+                font-size: 0.875rem;
+                padding: 0.625rem 0.875rem;
+            }
+            .textarea-field {
+                min-height: 5rem;
+            }
+            .output-area {
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+            .output-area h4 {
+                font-size: 1rem;
+            }
+            .output-area p, .output-area .output-label {
+                font-size: 0.8125rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+            }
+            .close-button {
+                font-size: 1.8rem;
+            }
+            .status-message {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+            .alert-warning {
+                padding: 1rem;
+            }
+            .alert-warning .alert-title {
+                font-size: 1rem;
+            }
+            .alert-warning .alert-text {
+                font-size: 0.8125rem;
+            }
+        }
+
+        /* Cho màn hình tablet và lớn hơn */
+        @media (min-width: 768px) {
+            .grid-layout {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* 2 cột trên tablet */
+                gap: 2rem; /* Khoảng cách giữa các cột/hàng */
+            }
+            .main-container {
+                padding: 3rem 4rem;
+            }
+            .app-header .main-title {
+                font-size: 4rem;
+            }
+            .app-header .tagline {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Cho màn hình desktop lớn và lớn hơn */
+        @media (min-width: 1200px) {
+            .grid-layout-3-cols {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr); /* 3 cột trên desktop */
+                gap: 2.5rem; /* Khoảng cách lớn hơn */
+            }
+            .grid-layout-2-cols {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* 2 cột cho các nhóm lớn */
+                gap: 2.5rem;
+            }
+            .main-container {
+                padding: 4rem 5rem;
+            }
+            .app-header .main-title {
+                font-size: 4.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header của ứng dụng -->
+    <header class="app-header">
+        <h1 class="main-title">Hệ Thống Truyền File An Toàn</h1>
+        <p class="tagline">Ký số, xác minh, mã hóa và giải mã dữ liệu của bạn một cách bảo mật.</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Phần Cảnh báo bảo mật -->
+        <div class="alert-warning" role="alert">
+            <p class="alert-title">⚠️ Cảnh báo bảo mật quan trọng:</p>
+            <p class="alert-text">Ứng dụng này được tạo ra với mục đích **minh họa và giáo dục**. Trong một ứng dụng thực tế và an toàn tuyệt đối, bạn **TUYỆT ĐỐI KHÔNG** được gửi khóa riêng (private key) của mình lên server vì bất kỳ lý do gì.</p>
+            <p class="alert-text mt-1">Khóa riêng phải luôn được giữ an toàn trên thiết bị của bạn (ví dụ: máy tính cá nhân, USB token, hoặc Hardware Security Module - HSM). Việc truyền khóa riêng lên server trong ví dụ này chỉ để đơn giản hóa quá trình demo các chức năng mật mã.</p>
+            <p class="alert-text mt-1 font-bold">Hãy luôn cẩn thận với khóa riêng của bạn và chỉ sử dụng ứng dụng demo này với dữ liệu không nhạy cảm!</p>
+        </div>
+
+        <!-- Phần quản lý khóa -->
+        <section class="function-section">
+            <h2 class="function-section-title">Quản Lý Khóa Mật Mã</h2>
+            <div class="grid-layout">
+                <!-- 1. Tạo cặp khóa RSA -->
+                <div class="feature-card">
+                    <h3>1. Tạo Cặp Khóa RSA Mới</h3>
+                    <p class="card-description">Tạo một cặp khóa RSA (khóa riêng và khóa công khai). Khóa riêng của bạn có thể được bảo vệ bằng mật khẩu mạnh để tăng cường bảo mật.</p>
+                    <div class="form-group">
+                        <label for="generateKeyPassword" class="form-label">Mật khẩu bảo vệ khóa riêng (tùy chọn):</label>
+                        <input type="password" id="generateKeyPassword" class="input-field" placeholder="Để trống nếu không muốn mật khẩu">
+                    </div>
+                    <button id="generateKeysBtn" class="btn-primary">
+                        Tạo Khóa Mới
+                        <span id="generateKeysSpinner" class="spinner hidden"></span>
+                    </button>
+
+                    <div id="keyOutput" class="output-area hidden">
+                        <h4>Khóa của bạn:</h4>
+                        <div class="form-group">
+                            <label for="privateKeyOutput" class="output-label">Khóa Riêng (Private Key):</label>
+                            <textarea id="privateKeyOutput" rows="8" class="textarea-field" readonly></textarea>
+                            <button onclick="copyToClipboard('privateKeyOutput')" class="btn-secondary mt-2">Sao chép Khóa Riêng</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="publicKeyOutput" class="output-label">Khóa Công Khai (Public Key):</label>
+                            <textarea id="publicKeyOutput" rows="8" class="textarea-field" readonly></textarea>
+                            <button onclick="copyToClipboard('publicKeyOutput')" class="btn-secondary mt-2">Sao chép Khóa Công Khai</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phần Ký số và Xác minh -->
+        <section class="function-section">
+            <h2 class="function-section-title">Ký Số và Xác Minh Dữ Liệu</h2>
+            <div class="grid-layout">
+                <!-- 2. Ký số file -->
+                <div class="feature-card">
+                    <h3>2. Ký Số File</h3>
+                    <p class="card-description">Chọn file bạn muốn ký và cung cấp khóa riêng của bạn. Hệ thống sẽ tạo ra một chữ ký số duy nhất cho file, đảm bảo tính toàn vẹn và không thể chối bỏ nguồn gốc.</p>
+                    <div class="form-group">
+                        <label for="fileToSign" class="form-label">Chọn File để Ký:</label>
+                        <input type="file" id="fileToSign" class="input-field" accept="*/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="privateKeyForSigning" class="form-label">Khóa Riêng của bạn (PEM):</label>
+                        <textarea id="privateKeyForSigning" rows="6" class="textarea-field" placeholder="Dán khóa riêng của bạn vào đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordForSigning" class="form-label">Mật khẩu Khóa Riêng (nếu có):</label>
+                        <input type="password" id="passwordForSigning" class="input-field" placeholder="Mật khẩu của khóa riêng">
+                    </div>
+                    <button id="signFileBtn" class="btn-primary">
+                        Ký File
+                        <span id="signFileSpinner" class="spinner hidden"></span>
+                    </button>
+                    <div id="signResult" class="output-area hidden">
+                        <h4>Kết quả Ký File:</h4>
+                        <p><span class="font-bold">File đã ký:</span> <span id="signedFilename"></span></p>
+                        <label for="signatureOutput" class="output-label">Chữ ký số (Base64):</label>
+                        <textarea id="signatureOutput" rows="6" class="textarea-field" readonly></textarea>
+                        <button onclick="copyToClipboard('signatureOutput')" class="btn-secondary mt-2">Sao chép Chữ ký</button>
+                    </div>
+                </div>
+
+                <!-- 3. Xác minh chữ ký file -->
+                <div class="feature-card">
+                    <h3>3. Xác Minh Chữ Ký File</h3>
+                    <p class="card-description">Chọn file gốc, chữ ký số và khóa công khai của người ký để xác minh tính toàn vẹn và nguồn gốc của file. Điều này giúp đảm bảo file không bị thay đổi và được gửi từ đúng người.</p>
+                    <div class="form-group">
+                        <label for="fileToVerify" class="form-label">Chọn File Gốc để Xác Minh:</label>
+                        <input type="file" id="fileToVerify" class="input-field" accept="*/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="signatureToVerify" class="form-label">Chữ ký số (Base64):</label>
+                        <textarea id="signatureToVerify" rows="6" class="textarea-field" placeholder="Dán chữ ký số vào đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="publicKeyForVerification" class="form-label">Khóa Công Khai của người ký (PEM):</label>
+                        <textarea id="publicKeyForVerification" rows="6" class="textarea-field" placeholder="Dán khóa công khai của người ký vào đây..."></textarea>
+                    </div>
+                    <button id="verifyFileBtn" class="btn-primary">
+                        Xác Minh Chữ Ký
+                        <span id="verifyFileSpinner" class="spinner hidden"></span>
+                    </button>
+                    <div id="verifyResult" class="output-area hidden">
+                        <h4>Kết quả Xác Minh:</h4>
+                        <p class="status-message" id="verificationStatus"></p>
+                        <p><span class="font-bold">File:</span> <span id="verifiedFilename"></span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phần Mã hóa và Giải mã -->
+        <section class="function-section">
+            <h2 class="function-section-title">Mã Hóa và Giải Mã Dữ Liệu</h2>
+            <div class="grid-layout">
+                <!-- 4. Mã hóa file -->
+                <div class="feature-card">
+                    <h3>4. Mã Hóa File</h3>
+                    <p class="card-description">Chọn file bạn muốn mã hóa và cung cấp khóa công khai của người nhận. File sẽ được mã hóa mạnh mẽ để chỉ người đó mới có thể giải mã, đảm bảo tính bảo mật của nội dung.</p>
+                    <div class="form-group">
+                        <label for="fileToEncrypt" class="form-label">Chọn File để Mã hóa:</label>
+                        <input type="file" id="fileToEncrypt" class="input-field" accept="*/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientPublicKeyForEncryption" class="form-label">Khóa Công Khai của Người Nhận (PEM):</label>
+                        <textarea id="recipientPublicKeyForEncryption" rows="6" class="textarea-field" placeholder="Dán khóa công khai của người nhận vào đây..."></textarea>
+                    </div>
+                    <button id="encryptFileBtn" class="btn-primary">
+                        Mã Hóa File
+                        <span id="encryptFileSpinner" class="spinner hidden"></span>
+                    </button>
+                    <div id="encryptResult" class="output-area hidden">
+                        <h4>Kết quả Mã Hóa:</h4>
+                        <p><span class="font-bold">File gốc:</span> <span id="encryptedOriginalFilename"></span></p>
+                        <label for="encryptedFileDataOutput" class="output-label">Dữ liệu File đã Mã hóa (Base64):</label>
+                        <textarea id="encryptedFileDataOutput" rows="8" class="textarea-field" readonly></textarea>
+                        <button onclick="copyToClipboard('encryptedFileDataOutput')" class="btn-secondary mt-2">Sao chép Dữ liệu mã hóa</button>
+                        <label for="encryptedSessionKeyOutput" class="output-label">Khóa Phiên (AES Key & IV) đã Mã hóa (Base64):</label>
+                        <textarea id="encryptedSessionKeyOutput" rows="6" class="textarea-field" readonly></textarea>
+                        <button onclick="copyToClipboard('encryptedSessionKeyOutput')" class="btn-secondary mt-2">Sao chép Khóa phiên mã hóa</button>
+                    </div>
+                </div>
+
+                <!-- 5. Giải mã file -->
+                <div class="feature-card">
+                    <h3>5. Giải Mã File</h3>
+                    <p class="card-description">Cung cấp dữ liệu file đã mã hóa, khóa phiên đã mã hóa và khóa riêng của bạn để giải mã file. Chỉ người sở hữu khóa riêng tương ứng mới có thể giải mã thành công.</p>
+                    <div class="form-group">
+                        <label for="encryptedFileDataInput" class="form-label">Dữ liệu File đã Mã hóa (Base64):</label>
+                        <textarea id="encryptedFileDataInput" rows="8" class="textarea-field" placeholder="Dán dữ liệu file đã mã hóa vào đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="encryptedSessionKeyInput" class="form-label">Khóa Phiên (AES Key & IV) đã Mã hóa (Base64):</label>
+                        <textarea id="encryptedSessionKeyInput" rows="6" class="textarea-field" placeholder="Dán khóa phiên đã mã hóa vào đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="privateKeyForDecryption" class="form-label">Khóa Riêng của bạn (PEM):</label>
+                        <textarea id="privateKeyForDecryption" rows="6" class="textarea-field" placeholder="Dán khóa riêng của bạn vào đây..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordForDecryption" class="form-label">Mật khẩu Khóa Riêng (nếu có):</label>
+                        <input type="password" id="passwordForDecryption" class="input-field" placeholder="Mật khẩu của khóa riêng">
+                    </div>
+                    <button id="decryptFileBtn" class="btn-primary">
+                        Giải Mã File
+                        <span id="decryptFileSpinner" class="spinner hidden"></span>
+                    </button>
+                    <div id="decryptResult" class="output-area hidden">
+                        <h4>Kết quả Giải Mã:</h4>
+                        <p class="status-message" id="decryptionStatus"></p>
+                        <a id="downloadDecryptedFileLink" class="btn-primary mt-4 py-2 px-4" download="decrypted_file.bin">Tải xuống File đã Giải Mã</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Hộp thông báo tùy chỉnh (Custom Modal) - Hiển thị các thông báo cho người dùng -->
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle" class="text-2xl font-semibold mb-4 text-gray-800">Thông báo</h3>
+            <p id="modalMessage" class="text-gray-700 mb-6"></p>
+            <button class="btn-primary w-full" onclick="closeModal()">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- Hàm hỗ trợ chung cho UI và UX --- */
+
+        /**
+         * Hiển thị một hộp thông báo tùy chỉnh cho người dùng.
+         * Hộp thoại này thay thế các hàm `alert()` và `confirm()` mặc định của trình duyệt,
+         * giúp cung cấp trải nghiệm người dùng thống nhất và kiểm soát tốt hơn.
+         * @param {string} title Tiêu đề của hộp thông báo (ví dụ: "Thành Công", "Lỗi").
+         * @param {string} message Nội dung chi tiết của thông báo.
+         */
+        function showModal(title, message) {
+            // Cập nhật tiêu đề và nội dung của modal
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            const customModal = document.getElementById('customModal');
+
+            // Thiết lập display thành 'flex' để modal hiển thị và căn giữa
+            customModal.style.display = 'flex';
+            // Dùng setTimeout để đảm bảo trình duyệt đã áp dụng 'display: flex'
+            // trước khi thêm class 'show'. Điều này kích hoạt hiệu ứng CSS transition.
+            setTimeout(() => {
+                customModal.classList.add('show');
+            }, 10); // Khoảng trễ nhỏ (10ms) là đủ cho hầu hết các trình duyệt.
+        }
+
+        /**
+         * Đóng hộp thông báo tùy chỉnh.
+         * Hàm này loại bỏ class 'show' để kích hoạt hiệu ứng fade-out và slide-out của modal,
+         * sau đó ẩn hoàn toàn modal bằng cách đặt `display` về 'none' sau khi transition kết thúc.
+         */
+        function closeModal() {
+            const customModal = document.getElementById('customModal');
+            customModal.classList.remove('show'); // Xóa class 'show' để bắt đầu transition ẩn.
+
+            // Đặt một hẹn giờ để ẩn hoàn toàn modal sau khi hiệu ứng transition kết thúc.
+            // Thời gian này cần khớp với 'transition-duration' của modal trong CSS.
+            setTimeout(() => {
+                customModal.style.display = 'none';
+            }, 300); // 300ms là thời gian transition đã được định nghĩa trong CSS.
+        }
+
+        /**
+         * Sao chép nội dung từ một phần tử textarea hoặc input vào clipboard của hệ thống.
+         * Hàm này ưu tiên sử dụng `document.execCommand('copy')` vì nó có khả năng tương thích tốt hơn
+         * trong môi trường iframe hoặc các trình duyệt có hạn chế về quyền truy cập `navigator.clipboard`.
+         * @param {string} elementId ID của phần tử HTML (textarea hoặc input) chứa nội dung cần sao chép.
+         */
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.select(); // Chọn toàn bộ nội dung trong phần tử input/textarea.
+                // Đối với thiết bị di động, cần thêm `setSelectionRange` để đảm bảo lựa chọn hoạt động.
+                element.setSelectionRange(0, 99999); // Chọn từ ký tự đầu tiên đến cuối cùng.
+
+                try {
+                    // Thực hiện lệnh sao chép. Lệnh này có thể không hoạt động trong mọi môi trường
+                    // mà không có tương tác người dùng (ví dụ: click chuột).
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showModal('Sao Chép Thành Công', 'Nội dung đã được sao chép vào clipboard!');
+                    } else {
+                        // Nếu `execCommand` trả về false, có thể trình duyệt không cho phép sao chép tự động.
+                        showModal('Lỗi Sao Chép', 'Không thể sao chép nội dung vào clipboard. Vui lòng thử lại hoặc sao chép thủ công (Ctrl+C/Cmd+C).');
+                    }
+                } catch (err) {
+                    // Bắt các lỗi xảy ra trong quá trình thực hiện `execCommand`.
+                    console.error('Lỗi khi sao chép:', err);
+                    showModal('Lỗi Sao Chép', `Không thể sao chép nội dung vào clipboard: ${err.message}.`);
+                }
+            } else {
+                // Thông báo nếu phần tử với ID được cung cấp không tìm thấy trong DOM.
+                showModal('Lỗi Sao Chép', `Không tìm thấy phần tử có ID "${elementId}" để sao chép.`);
+            }
+        }
+
+        /**
+         * Hiển thị hoặc ẩn biểu tượng spinner loading.
+         * Spinner được sử dụng để cung cấp phản hồi trực quan cho người dùng khi một tác vụ đang được xử lý.
+         * @param {string} spinnerId ID của phần tử spinner (thường là một `<span>` có class 'spinner').
+         * @param {boolean} show `true` để hiển thị spinner, `false` để ẩn nó.
+         */
+        function toggleSpinner(spinnerId, show) {
+            const spinner = document.getElementById(spinnerId);
+            if (spinner) {
+                if (show) {
+                    spinner.classList.remove('hidden'); // Hiển thị spinner bằng cách xóa class 'hidden'.
+                } else {
+                    spinner.classList.add('hidden'); // Ẩn spinner bằng cách thêm lại class 'hidden'.
+                }
+            }
+        }
+
+        /* --- Logic xử lý các chức năng chính của ứng dụng --- */
+
+        // 1. Chức năng Tạo cặp khóa RSA
+        // Gán sự kiện 'click' cho nút "Tạo Khóa Mới".
+        document.getElementById('generateKeysBtn').addEventListener('click', async () => {
+            const passwordInput = document.getElementById('generateKeyPassword');
+            const password = passwordInput.value; // Lấy mật khẩu người dùng nhập (nếu có) để bảo vệ khóa riêng.
+
+            const keyOutputDiv = document.getElementById('keyOutput'); // Khu vực hiển thị khóa.
+            const privateKeyOutput = document.getElementById('privateKeyOutput'); // Textarea cho khóa riêng.
+            const publicKeyOutput = document.getElementById('publicKeyOutput'); // Textarea cho khóa công khai.
+
+            toggleSpinner('generateKeysSpinner', true); // Bắt đầu hiển thị spinner.
+            keyOutputDiv.classList.add('hidden'); // Ẩn khu vực kết quả cũ để chuẩn bị hiển thị kết quả mới.
+
+            try {
+                // Gửi yêu cầu POST không đồng bộ (fetch API) đến API backend để tạo khóa.
+                // Body được gửi dưới dạng JSON.
+                const response = await fetch('/api/generate-keys', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Đặt Content-Type để server biết định dạng dữ liệu.
+                    },
+                    body: JSON.stringify({ password: password }) // Chuyển đổi đối tượng JS thành chuỗi JSON.
+                });
+
+                const data = await response.json(); // Chờ phản hồi JSON từ server.
+
+                if (response.ok) { // Kiểm tra mã trạng thái HTTP (200-299 là thành công).
+                    // Cập nhật các textarea với khóa riêng và khóa công khai nhận được từ server.
+                    privateKeyOutput.value = data.private_key;
+                    publicKeyOutput.value = data.public_key;
+                    keyOutputDiv.classList.remove('hidden'); // Hiển thị khu vực kết quả sau khi nhận được khóa.
+                    showModal('Thành Công', 'Cặp khóa RSA đã được tạo thành công! Vui lòng **sao chép và lưu trữ khóa riêng của bạn ở nơi cực kỳ an toàn**. Khóa này không được lưu trên hệ thống.');
+                } else {
+                    // Nếu phản hồi không thành công, hiển thị lỗi từ server.
+                    const errorMessage = data.error || 'Lỗi không xác định';
+                    showModal('Lỗi', `Không thể tạo khóa: ${errorMessage}`);
+                    console.error('Lỗi từ server khi tạo khóa:', data.details || errorMessage);
+                }
+            } catch (error) {
+                // Bắt các lỗi về mạng hoặc lỗi khác trong quá trình gửi/nhận yêu cầu.
+                console.error('Lỗi khi gửi yêu cầu tạo khóa:', error);
+                showModal('Lỗi Kết Nối', `Không thể kết nối đến server hoặc có lỗi mạng: ${error.message}. Vui lòng kiểm tra console để biết thêm chi tiết.`);
+            } finally {
+                // Cuối cùng, luôn ẩn spinner khi quá trình hoàn tất (thành công hoặc thất bại).
+                toggleSpinner('generateKeysSpinner', false);
+            }
+        });
+
+        // 2. Chức năng Ký số file
+        // Gán sự kiện 'click' cho nút "Ký File".
+        document.getElementById('signFileBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileToSign');
+            const privateKeyInput = document.getElementById('privateKeyForSigning');
+            const passwordInput = document.getElementById('passwordForSigning');
+
+            const privateKey = privateKeyInput.value; // Lấy khóa riêng từ textarea.
+            const password = passwordInput.value; // Lấy mật khẩu của khóa riêng (nếu có).
+
+            const signResultDiv = document.getElementById('signResult'); // Khu vực hiển thị kết quả ký số.
+            const signedFilenameSpan = document.getElementById('signedFilename'); // Span hiển thị tên file đã ký.
+            const signatureOutput = document.getElementById('signatureOutput'); // Textarea cho chữ ký số.
+
+            // Kiểm tra xem người dùng đã chọn file và cung cấp khóa riêng chưa.
+            if (!fileInput.files[0]) {
+                showModal('Lỗi', 'Vui lòng chọn một file để ký.');
+                return; // Dừng hàm nếu thiếu input.
+            }
+            if (!privateKey.trim()) { // `.trim()` loại bỏ khoảng trắng ở đầu/cuối chuỗi.
+                showModal('Lỗi', 'Vui lòng cung cấp khóa riêng của bạn để ký file.');
+                return;
+            }
+
+            toggleSpinner('signFileSpinner', true); // Bắt đầu hiển thị spinner.
+            signResultDiv.classList.add('hidden'); // Ẩn khu vực kết quả cũ.
+
+            // Sử dụng FormData để gửi file và các trường văn bản cùng lúc.
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]); // Thêm file vào FormData.
+            formData.append('private_key', privateKey); // Thêm khóa riêng.
+            if (password.trim()) { // Chỉ thêm mật khẩu nếu nó không rỗng.
+                formData.append('private_key_password', password);
+            }
+
+            try {
+                // Gửi yêu cầu POST không đồng bộ đến API ký số.
+                // `fetch` với FormData không cần đặt `Content-Type` headers, trình duyệt sẽ tự động đặt.
+                const response = await fetch('/api/upload-and-sign', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json(); // Chờ phản hồi JSON.
+
+                if (response.ok) {
+                    // Cập nhật giao diện với tên file và chữ ký số.
+                    signedFilenameSpan.innerText = data.original_filename;
+                    signatureOutput.value = data.signature;
+                    signResultDiv.classList.remove('hidden'); // Hiển thị khu vực kết quả.
+                    showModal('Thành Công', `File "${data.original_filename}" đã được ký số thành công! Chữ ký đã được tạo. Vui lòng sao chép chữ ký để gửi kèm với file.`);
+                } else {
+                    const errorMessage = data.error || 'Lỗi không xác định';
+                    showModal('Lỗi', `Không thể ký file: ${errorMessage}`);
+                    console.error('Lỗi từ server khi ký file:', data.details || errorMessage);
+                }
+            } catch (error) {
+                console.error('Lỗi khi gửi yêu cầu ký file:', error);
+                showModal('Lỗi Kết Nối', `Không thể kết nối đến server hoặc có lỗi mạng: ${error.message}.`);
+            } finally {
+                toggleSpinner('signFileSpinner', false); // Ẩn spinner khi hoàn tất.
+            }
+        });
+
+        // 3. Chức năng Xác minh chữ ký file
+        // Gán sự kiện 'click' cho nút "Xác Minh Chữ Ký".
+        document.getElementById('verifyFileBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileToVerify');
+            const signatureInput = document.getElementById('signatureToVerify');
+            const publicKeyInput = document.getElementById('publicKeyForVerification');
+
+            const signature = signatureInput.value; // Lấy chữ ký số từ textarea.
+            const publicKey = publicKeyInput.value; // Lấy khóa công khai từ textarea.
+
+            const verifyResultDiv = document.getElementById('verifyResult'); // Khu vực hiển thị kết quả xác minh.
+            const verificationStatus = document.getElementById('verificationStatus'); // Span hiển thị trạng thái xác minh.
+            const verifiedFilename = document.getElementById('verifiedFilename'); // Span hiển thị tên file được xác minh.
+
+            // Kiểm tra các input cần thiết.
+            if (!fileInput.files[0]) {
+                showModal('Lỗi', 'Vui lòng chọn file gốc để xác minh.');
+                return;
+            }
+            if (!signature.trim()) {
+                showModal('Lỗi', 'Vui lòng cung cấp chữ ký số để xác minh.');
+                return;
+            }
+            if (!publicKey.trim()) {
+                showModal('Lỗi', 'Vui lòng cung cấp khóa công khai của người ký.');
+                return;
+            }
+
+            toggleSpinner('verifyFileSpinner', true); // Bắt đầu hiển thị spinner.
+            verifyResultDiv.classList.add('hidden'); // Ẩn khu vực kết quả cũ.
+            // Xóa các class trạng thái cũ để đảm bảo hiển thị đúng trạng thái mới.
+            verificationStatus.classList.remove('status-valid', 'status-invalid');
+
+            // Sử dụng FormData để gửi file và các trường văn bản.
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('signature', signature);
+            formData.append('public_key', publicKey);
+
+            try {
+                // Gửi yêu cầu POST không đồng bộ đến API xác minh chữ ký.
+                const response = await fetch('/api/verify-signature', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json(); // Chờ phản hồi JSON.
+
+                if (response.ok) {
+                    verifiedFilename.innerText = data.filename; // Cập nhật tên file.
+                    if (data.status === "Signature VALID") {
+                        verificationStatus.innerText = 'Chữ ký HỢP LỆ ✅';
+                        verificationStatus.classList.add('status-valid'); // Áp dụng styling thành công.
+                        showModal('Xác Minh Thành Công', `Chữ ký cho file "${data.filename}" là HỢP LỆ! Điều này xác nhận file chưa bị thay đổi và được gửi từ đúng người ký.`);
+                    } else {
+                        verificationStatus.innerText = 'Chữ ký KHÔNG HỢP LỆ ❌';
+                        verificationStatus.classList.add('status-invalid'); // Áp dụng styling lỗi.
+                        showModal('Xác Minh Thất Bại', `Chữ ký cho file "${data.filename}" là KHÔNG HỢP LỆ! Chi tiết: ${data.details || ''}. File có thể đã bị thay đổi hoặc chữ ký không chính xác.`);
+                    }
+                    verifyResultDiv.classList.remove('hidden'); // Hiển thị khu vực kết quả.
+                } else {
+                    const errorMessage = data.error || 'Lỗi không xác định';
+                    showModal('Lỗi', `Không thể xác minh chữ ký: ${errorMessage}`);
+                    console.error('Lỗi từ server khi xác minh chữ ký:', data.details || errorMessage);
+                }
+            } catch (error) {
+                console.error('Lỗi khi gửi yêu cầu xác minh chữ ký:', error);
+                showModal('Lỗi Kết Nối', `Không thể kết nối đến server hoặc có lỗi mạng: ${error.message}.`);
+            } finally {
+                toggleSpinner('verifyFileSpinner', false); // Ẩn spinner khi hoàn tất.
+            }
+        });
+
+        // 4. Chức năng Mã hóa file
+        // Gán sự kiện 'click' cho nút "Mã Hóa File".
+        document.getElementById('encryptFileBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileToEncrypt');
+            const recipientPublicKeyInput = document.getElementById('recipientPublicKeyForEncryption');
+
+            const recipientPublicKey = recipientPublicKeyInput.value; // Lấy khóa công khai của người nhận.
+
+            const encryptResultDiv = document.getElementById('encryptResult'); // Khu vực hiển thị kết quả mã hóa.
+            const encryptedOriginalFilenameSpan = document.getElementById('encryptedOriginalFilename'); // Span hiển thị tên file gốc.
+            const encryptedFileDataOutput = document.getElementById('encryptedFileDataOutput'); // Textarea cho dữ liệu file đã mã hóa.
+            const encryptedSessionKeyOutput = document.getElementById('encryptedSessionKeyOutput'); // Textarea cho khóa phiên đã mã hóa.
+
+            // Kiểm tra các input cần thiết.
+            if (!fileInput.files[0]) {
+                showModal('Lỗi', 'Vui lòng chọn một file để mã hóa.');
+                return;
+            }
+            if (!recipientPublicKey.trim()) {
+                showModal('Lỗi', 'Vui lòng cung cấp khóa công khai của người nhận.');
+                return;
+            }
+
+            toggleSpinner('encryptFileSpinner', true); // Bắt đầu hiển thị spinner.
+            encryptResultDiv.classList.add('hidden'); // Ẩn khu vực kết quả cũ.
+
+            // Sử dụng FormData để gửi file và khóa công khai của người nhận.
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('recipient_public_key', recipientPublicKey);
+
+            try {
+                // Gửi yêu cầu POST không đồng bộ đến API mã hóa file.
+                const response = await fetch('/api/upload-and-encrypt', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json(); // Chờ phản hồi JSON.
+
+                if (response.ok) {
+                    // Cập nhật giao diện với tên file gốc, dữ liệu file mã hóa và khóa phiên mã hóa.
+                    encryptedOriginalFilenameSpan.innerText = data.original_filename;
+                    encryptedFileDataOutput.value = data.encrypted_file_data;
+                    encryptedSessionKeyOutput.value = data.encrypted_session_key_and_iv;
+                    encryptResultDiv.classList.remove('hidden'); // Hiển thị khu vực kết quả.
+                    showModal('Thành Công', `File "${data.original_filename}" đã được mã hóa thành công! Vui lòng gửi cả **dữ liệu file mã hóa** và **khóa phiên đã mã hóa** cho người nhận để họ có thể giải mã.`);
+                } else {
+                    const errorMessage = data.error || 'Lỗi không xác định';
+                    showModal('Lỗi', `Không thể mã hóa file: ${errorMessage}`);
+                    console.error('Lỗi từ server khi mã hóa file:', data.details || errorMessage);
+                }
+            } catch (error) {
+                console.error('Lỗi khi gửi yêu cầu mã hóa file:', error);
+                showModal('Lỗi Kết Nối', `Không thể kết nối đến server hoặc có lỗi mạng: ${error.message}.`);
+            } finally {
+                toggleSpinner('encryptFileSpinner', false); // Ẩn spinner khi hoàn tất.
+            }
+        });
+
+        // 5. Chức năng Giải mã file
+        // Gán sự kiện 'click' cho nút "Giải Mã File".
+        document.getElementById('decryptFileBtn').addEventListener('click', async () => {
+            const encryptedFileDataInput = document.getElementById('encryptedFileDataInput');
+            const encryptedSessionKeyInput = document.getElementById('encryptedSessionKeyInput');
+            const privateKeyInput = document.getElementById('privateKeyForDecryption');
+            const passwordInput = document.getElementById('passwordForDecryption');
+
+            const encryptedFileData = encryptedFileDataInput.value; // Lấy dữ liệu file đã mã hóa.
+            const encryptedSessionKey = encryptedSessionKeyInput.value; // Lấy khóa phiên đã mã hóa.
+            const privateKey = privateKeyInput.value; // Lấy khóa riêng của người nhận.
+            const password = passwordInput.value; // Lấy mật khẩu của khóa riêng (nếu có).
+
+            const decryptResultDiv = document.getElementById('decryptResult'); // Khu vực hiển thị kết quả giải mã.
+            const decryptionStatus = document.getElementById('decryptionStatus'); // Span hiển thị trạng thái giải mã.
+            const downloadLink = document.getElementById('downloadDecryptedFileLink'); // Link tải xuống file đã giải mã.
+
+            // Kiểm tra các input cần thiết.
+            if (!encryptedFileData.trim() || !encryptedSessionKey.trim() || !privateKey.trim()) {
+                showModal('Lỗi', 'Vui lòng cung cấp đầy đủ dữ liệu file đã mã hóa, khóa phiên đã mã hóa và khóa riêng của bạn.');
+                return;
+            }
+
+            toggleSpinner('decryptFileSpinner', true); // Bắt đầu hiển thị spinner.
+            decryptResultDiv.classList.add('hidden'); // Ẩn khu vực kết quả cũ.
+            downloadLink.classList.add('hidden'); // Ẩn link tải xuống cũ.
+            // Xóa các class trạng thái cũ để đảm bảo hiển thị đúng trạng thái mới.
+            decryptionStatus.classList.remove('status-valid', 'status-invalid');
+
+
+            try {
+                // Gửi yêu cầu POST không đồng bộ đến API giải mã file.
+                // Dữ liệu được gửi dưới dạng JSON.
+                const response = await fetch('/api/decrypt-file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        encrypted_file_data: encryptedFileData,
+                        encrypted_session_key_and_iv: encryptedSessionKey,
+                        recipient_private_key: privateKey,
+                        private_key_password: password
+                    })
+                });
+
+                if (response.ok) {
+                    // Nếu giải mã thành công, backend sẽ gửi lại file trực tiếp dưới dạng binary.
+                    // Tạo một Blob từ phản hồi và tạo URL để người dùng có thể tải xuống.
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+
+                    // Cố gắng lấy tên file từ header `Content-Disposition`.
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'decrypted_file.bin'; // Tên file mặc định nếu không lấy được từ header.
+                    if (contentDisposition && contentDisposition.includes('filename=')) {
+                        // Tách tên file từ chuỗi header (ví dụ: 'attachment; filename="ten_file.bin"').
+                        filename = contentDisposition.split('filename=')[1].replace(/"/g, '');
+                    }
+                    downloadLink.download = filename; // Đặt tên file cho link tải xuống.
+
+                    downloadLink.classList.remove('hidden'); // Hiển thị link tải xuống.
+                    decryptionStatus.innerText = 'File đã được giải mã thành công! 🎉';
+                    decryptionStatus.classList.add('status-valid'); // Áp dụng styling thành công.
+                    showModal('Thành Công', `File đã được giải mã thành công! Vui lòng tải xuống file "${filename}" qua nút bên dưới.`);
+
+                } else {
+                    // Nếu phản hồi không thành công, đọc lỗi JSON từ server và hiển thị.
+                    const errorData = await response.json();
+                    const errorMessage = errorData.error || 'Lỗi không xác định';
+                    decryptionStatus.innerText = `Giải mã THẤT BẠI ❌: ${errorMessage}`;
+                    decryptionStatus.classList.add('status-invalid'); // Áp dụng styling lỗi.
+                    showModal('Giải Mã Thất Bại', `Không thể giải mã file: ${errorMessage}. Vui lòng kiểm tra lại dữ liệu mã hóa, khóa phiên, và khóa riêng của bạn.`);
+                    console.error('Lỗi từ server khi giải mã file:', errorData.details || errorMessage);
+                }
+                decryptResultDiv.classList.remove('hidden'); // Hiển thị khu vực kết quả.
+
+            } catch (error) {
+                console.error('Lỗi khi gửi yêu cầu giải mã file:', error);
+                decryptionStatus.innerText = `Giải mã THẤT BẠI ❌: ${error.message}`;
+                decryptionStatus.classList.add('status-invalid'); // Áp dụng styling lỗi.
+                showModal('Lỗi Kết Nối', `Không thể kết nối đến server hoặc có lỗi mạng: ${error.message}.`);
+            } finally {
+                toggleSpinner('decryptFileSpinner', false); // Ẩn spinner khi hoàn tất.
+            }
+        });
+    </script>
+</body>
+</html>
